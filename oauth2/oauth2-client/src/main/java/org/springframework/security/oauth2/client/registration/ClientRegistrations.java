@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import com.nimbusds.oauth2.sdk.GrantType;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.as.AuthorizationServerMetadata;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
@@ -239,21 +240,49 @@ public final class ClientRegistrations {
 				() -> "The Issuer \"" + metadataIssuer + "\" provided in the configuration metadata did "
 						+ "not match the requested issuer \"" + issuer + "\"");
 		String name = URI.create(issuer).getHost();
+		AuthorizationGrantType grantType = getAuthorizationGrantType(metadata.getGrantTypes());
 		ClientAuthenticationMethod method = getClientAuthenticationMethod(issuer,
 				metadata.getTokenEndpointAuthMethods());
 		Map<String, Object> configurationMetadata = new LinkedHashMap<>(metadata.toJSONObject());
 		// @formatter:off
 		return ClientRegistration.withRegistrationId(name)
 				.userNameAttributeName(IdTokenClaimNames.SUB)
-				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(grantType)
 				.clientAuthenticationMethod(method)
 				.redirectUri("{baseUrl}/{action}/oauth2/code/{registrationId}")
-				.authorizationUri(metadata.getAuthorizationEndpointURI().toASCIIString())
+				.authorizationUri((metadata.getAuthorizationEndpointURI() != null) ? metadata
+						.getAuthorizationEndpointURI().toASCIIString() : null)
 				.providerConfigurationMetadata(configurationMetadata)
 				.tokenUri(metadata.getTokenEndpointURI().toASCIIString())
 				.issuerUri(issuer)
 				.clientName(issuer);
 		// @formatter:on
+	}
+
+	private static AuthorizationGrantType getAuthorizationGrantType(List<GrantType> metadataGrantTypes) {
+		if (metadataGrantTypes == null || metadataGrantTypes.size() > 1) {
+			return AuthorizationGrantType.AUTHORIZATION_CODE;
+		}
+		GrantType grantType = metadataGrantTypes.get(0);
+		if (GrantType.AUTHORIZATION_CODE.equals(grantType)) {
+			return AuthorizationGrantType.AUTHORIZATION_CODE;
+		}
+		else if (GrantType.IMPLICIT.equals(grantType)) {
+			return AuthorizationGrantType.IMPLICIT;
+		}
+		else if (GrantType.REFRESH_TOKEN.equals(grantType)) {
+			return AuthorizationGrantType.REFRESH_TOKEN;
+		}
+		else if (GrantType.CLIENT_CREDENTIALS.equals(grantType)) {
+			return AuthorizationGrantType.CLIENT_CREDENTIALS;
+		}
+		else if (GrantType.PASSWORD.equals(grantType)) {
+			return AuthorizationGrantType.PASSWORD;
+		}
+		else if (GrantType.JWT_BEARER.equals(grantType)) {
+			return AuthorizationGrantType.JWT_BEARER;
+		}
+		return new AuthorizationGrantType(grantType.getValue());
 	}
 
 	private static ClientAuthenticationMethod getClientAuthenticationMethod(String issuer,

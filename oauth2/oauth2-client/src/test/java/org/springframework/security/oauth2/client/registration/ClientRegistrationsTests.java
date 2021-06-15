@@ -240,13 +240,44 @@ public class ClientRegistrationsTests {
 		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.AUTHORIZATION_CODE);
 	}
 
+	// gh-9795
+	@Test
+	public void issuerWhenMultipleGrantTypesThenDefaulted() throws Exception {
+		this.response.put("grant_types_supported", Arrays.asList("client_credentials", "password"));
+		ClientRegistration registration = registration("").build();
+		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.AUTHORIZATION_CODE);
+	}
+
 	// gh-9828
 	@Test
 	public void issuerWhenImplicitGrantTypeThenSuccess() throws Exception {
 		this.response.put("grant_types_supported", Arrays.asList("implicit"));
 		ClientRegistration registration = registration("").build();
-		// The authorization_code grant type is still the default
-		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.AUTHORIZATION_CODE);
+		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.IMPLICIT);
+	}
+
+	// gh-9795
+	@Test
+	public void issuerWhenRefreshTokenGrantTypeThenSuccess() throws Exception {
+		this.response.put("grant_types_supported", Arrays.asList("refresh_token"));
+		ClientRegistration registration = registration("").build();
+		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.REFRESH_TOKEN);
+	}
+
+	// gh-9795
+	@Test
+	public void issuerWhenClientCredentialsGrantTypeThenSuccess() throws Exception {
+		this.response.put("grant_types_supported", Arrays.asList("client_credentials"));
+		ClientRegistration registration = registration("").build();
+		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.CLIENT_CREDENTIALS);
+	}
+
+	// gh-9795
+	@Test
+	public void issuerWhenPasswordGrantTypeThenSuccess() throws Exception {
+		this.response.put("grant_types_supported", Arrays.asList("password"));
+		ClientRegistration registration = registration("").build();
+		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.PASSWORD);
 	}
 
 	// gh-9828
@@ -254,8 +285,27 @@ public class ClientRegistrationsTests {
 	public void issuerWhenOAuth2JwtBearerGrantTypeThenSuccess() throws Exception {
 		this.response.put("grant_types_supported", Arrays.asList("urn:ietf:params:oauth:grant-type:jwt-bearer"));
 		ClientRegistration registration = registrationOAuth2("", null).build();
-		// The authorization_code grant type is still the default
-		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.AUTHORIZATION_CODE);
+		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.JWT_BEARER);
+	}
+
+	// gh-9795
+	@Test
+	public void issuerWhenSaml2BearerGrantTypeThenSuccess() throws Exception {
+		this.response.put("grant_types_supported", Arrays.asList("urn:ietf:params:oauth:grant-type:saml2-bearer"));
+		ClientRegistration registration = registration("").build();
+		assertThat(registration.getAuthorizationGrantType().getValue())
+				.isEqualTo("urn:ietf:params:oauth:grant-type:saml2-bearer");
+	}
+
+	// gh-9795
+	@Test
+	public void issuerWhenResponseAuthorizationEndpointIsNullThenSuccess() throws Exception {
+		this.response.put("grant_types_supported", Arrays.asList("urn:ietf:params:oauth:grant-type:jwt-bearer"));
+		this.response.remove("authorization_endpoint");
+		ClientRegistration registration = registration("").build();
+		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.JWT_BEARER);
+		ClientRegistration.ProviderDetails provider = registration.getProviderDetails();
+		assertThat(provider.getAuthorizationUri()).isNull();
 	}
 
 	@Test
