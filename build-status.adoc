@@ -3,15 +3,7 @@
 :table-strips: even
 
 .Build status by branch
-[cols="1,1",frame=ends,grid=rows]
-|===
-|Branch |Status
-|`main`
-|image:https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml/badge.svg?branch=main&event=push["6.x Build Status", link="https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml?query=branch%3Amain"]
-|`5.7.x`
-|image:https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml/badge.svg?branch=5.7.x&event=push["5.7.x Build Status", link="https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml?query=branch%3A5.7.x"]
-|`5.6.x`
-|image:https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml/badge.svg?branch=5.6.x&event=push["5.6.x Build Status", link="https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml?query=branch%3A5.6.x"]
-|`5.5.x`
-|image:https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml/badge.svg?branch=5.5.x&event=push["5.5.x Build Status", link="https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml?query=branch%3A5.5.x"]
-|===
+`main`:: image:https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml/badge.svg?branch=main&event=push["6.x Build Status", link="https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml?query=branch%3Amain"]
+`5.7.x`:: image:https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml/badge.svg?branch=5.7.x&event=push["5.7.x Build Status", link="https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml?query=branch%3A5.7.x"]
+`5.6.x`:: image:https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml/badge.svg?branch=5.6.x&event=push["5.6.x Build Status", link="https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml?query=branch%3A5.6.x"]
+`5.5.x`:: image:https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml/badge.svg?branch=5.5.x&event=push["5.5.x Build Status", link="https://github.com/spring-projects/spring-security/actions/workflows/continuous-integration-workflow.yml?query=branch%3A5.5.x"]
