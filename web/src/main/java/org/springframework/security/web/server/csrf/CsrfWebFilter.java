@@ -88,6 +88,8 @@ public class CsrfWebFilter implements WebFilter {
 
 	private boolean isTokenFromMultipartDataEnabled;
 
+	private boolean isTokenFromFormDataEnabled = true;
+
 	public void setAccessDeniedHandler(ServerAccessDeniedHandler accessDeniedHandler) {
 		Assert.notNull(accessDeniedHandler, "accessDeniedHandler");
 		this.accessDeniedHandler = accessDeniedHandler;
@@ -111,6 +113,17 @@ public class CsrfWebFilter implements WebFilter {
 	 */
 	public void setTokenFromMultipartDataEnabled(boolean tokenFromMultipartDataEnabled) {
 		this.isTokenFromMultipartDataEnabled = tokenFromMultipartDataEnabled;
+	}
+
+	/**
+	 * Specifies if the {@code CsrfWebFilter} should try to resolve the actual CSRF token
+	 * from the body of form data requests.
+	 * @param tokenFromFormDataEnabled true if should read from form data, else false.
+	 * Default is true
+	 * @since 5.8
+	 */
+	public void setTokenFromFormDataEnabled(boolean tokenFromFormDataEnabled) {
+		this.isTokenFromFormDataEnabled = tokenFromFormDataEnabled;
 	}
 
 	@Override
@@ -138,10 +151,23 @@ public class CsrfWebFilter implements WebFilter {
 	}
 
 	private Mono<Boolean> containsValidCsrfToken(ServerWebExchange exchange, CsrfToken expected) {
-		return exchange.getFormData().flatMap((data) -> Mono.justOrEmpty(data.getFirst(expected.getParameterName())))
+		return tokenFromFormData(exchange, expected)
 				.switchIfEmpty(Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(expected.getHeaderName())))
 				.switchIfEmpty(tokenFromMultipartData(exchange, expected))
 				.map((actual) -> equalsConstantTime(actual, expected.getToken()));
+	}
+
+	private Mono<String> tokenFromFormData(ServerWebExchange exchange, CsrfToken expected) {
+		if (!this.isTokenFromFormDataEnabled) {
+			return Mono.empty();
+		}
+		ServerHttpRequest request = exchange.getRequest();
+		HttpHeaders headers = request.getHeaders();
+		MediaType contentType = headers.getContentType();
+		if (!MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
+			return Mono.empty();
+		}
+		return exchange.getFormData().flatMap((data) -> Mono.justOrEmpty(data.getFirst(expected.getParameterName())));
 	}
 
 	private Mono<String> tokenFromMultipartData(ServerWebExchange exchange, CsrfToken expected) {
