@@ -133,4 +133,11 @@ public final class DefaultPasswordTokenResponseClient
 		this.restOperations = restOperations;
 	}
 
+	public static OAuth2AccessTokenResponseClient.Builder<OAuth2PasswordGrantRequest> builder() {
+		DefaultPasswordTokenResponseClient accessTokenResponseClient = new DefaultPasswordTokenResponseClient();
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
+				accessTokenResponseClient::setRequestEntityConverter,
+				accessTokenResponseClient::setRestOperations);
+	}
+
 }

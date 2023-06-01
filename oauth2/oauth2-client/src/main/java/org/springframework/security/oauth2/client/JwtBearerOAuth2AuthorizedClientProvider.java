@@ -21,10 +21,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Function;
 
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.RequestEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.client.endpoint.DefaultJwtBearerTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.DefaultRefreshTokenTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.JwtBearerGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2RefreshTokenGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
@@ -32,6 +36,7 @@ import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestOperations;
 
 /**
  * An implementation of an {@link OAuth2AuthorizedClientProvider} for the
@@ -169,6 +174,80 @@ public final class JwtBearerOAuth2AuthorizedClientProvider implements OAuth2Auth
 	public void setClock(Clock clock) {
 		Assert.notNull(clock, "clock cannot be null");
 		this.clock = clock;
+	}
+
+	public static JwtBearerGrantBuilder builder() {
+		return new JwtBearerGrantBuilder();
+	}
+
+	public static final class JwtBearerGrantBuilder implements OAuth2AuthorizedClientProviderBuilder.Builder {
+
+		private OAuth2AccessTokenResponseClient<JwtBearerGrantRequest> accessTokenResponseClient;
+
+		private Converter<JwtBearerGrantRequest, RequestEntity<?>> requestEntityConverter;
+
+		private RestOperations restOperations;
+
+		private Duration clockSkew;
+
+		private Clock clock;
+
+		private JwtBearerGrantBuilder() {
+		}
+
+		public JwtBearerGrantBuilder accessTokenResponseClient(OAuth2AccessTokenResponseClient<JwtBearerGrantRequest> accessTokenResponseClient) {
+			this.accessTokenResponseClient = accessTokenResponseClient;
+			return this;
+		}
+
+		public JwtBearerGrantBuilder requestEntityConverter(Converter<JwtBearerGrantRequest, RequestEntity<?>> requestEntityConverter) {
+			this.requestEntityConverter = requestEntityConverter;
+			return this;
+		}
+
+		public JwtBearerGrantBuilder restOperations(RestOperations restOperations) {
+			this.restOperations = restOperations;
+			return this;
+		}
+
+		public JwtBearerGrantBuilder clockSkew(Duration clockSkew) {
+			this.clockSkew = clockSkew;
+			return this;
+		}
+
+		public JwtBearerGrantBuilder clock(Clock clock) {
+			this.clock = clock;
+			return this;
+		}
+
+		@Override
+		public OAuth2AuthorizedClientProvider build() {
+			JwtBearerOAuth2AuthorizedClientProvider authorizedClientProvider =
+					new JwtBearerOAuth2AuthorizedClientProvider();
+			if (this.accessTokenResponseClient == null && (this.requestEntityConverter != null
+					|| this.restOperations != null)) {
+				DefaultJwtBearerTokenResponseClient accessTokenResponseClient =
+						new DefaultJwtBearerTokenResponseClient();
+				if (this.requestEntityConverter != null) {
+					accessTokenResponseClient.setRequestEntityConverter(this.requestEntityConverter);
+				}
+				if (this.restOperations != null) {
+					accessTokenResponseClient.setRestOperations(this.restOperations);
+				}
+				this.accessTokenResponseClient = accessTokenResponseClient;
+			}
+			if (this.accessTokenResponseClient != null) {
+				authorizedClientProvider.setAccessTokenResponseClient(this.accessTokenResponseClient);
+			}
+			if (this.clockSkew != null) {
+				authorizedClientProvider.setClockSkew(this.clockSkew);
+			}
+			if (this.clock != null) {
+				authorizedClientProvider.setClock(this.clock);
+			}
+			return authorizedClientProvider;
+		}
+
 	}
 
 }

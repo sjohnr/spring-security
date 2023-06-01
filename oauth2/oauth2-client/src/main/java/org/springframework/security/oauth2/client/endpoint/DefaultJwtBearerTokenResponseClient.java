@@ -124,4 +124,10 @@ public final class DefaultJwtBearerTokenResponseClient
 		this.restOperations = restOperations;
 	}
 
+	public static OAuth2AccessTokenResponseClient.Builder<JwtBearerGrantRequest> builder() {
+		DefaultJwtBearerTokenResponseClient accessTokenResponseClient = new DefaultJwtBearerTokenResponseClient();
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
+				accessTokenResponseClient::setRequestEntityConverter, accessTokenResponseClient::setRestOperations);
+	}
+
 }

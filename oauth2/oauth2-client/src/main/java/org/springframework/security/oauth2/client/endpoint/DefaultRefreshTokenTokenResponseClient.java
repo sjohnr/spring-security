@@ -138,4 +138,11 @@ public final class DefaultRefreshTokenTokenResponseClient
 		this.restOperations = restOperations;
 	}
 
+	public static OAuth2AccessTokenResponseClient.Builder<OAuth2RefreshTokenGrantRequest> builder() {
+		DefaultRefreshTokenTokenResponseClient accessTokenResponseClient =
+				new DefaultRefreshTokenTokenResponseClient();
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
+				accessTokenResponseClient::setRequestEntityConverter, accessTokenResponseClient::setRestOperations);
+	}
+
 }

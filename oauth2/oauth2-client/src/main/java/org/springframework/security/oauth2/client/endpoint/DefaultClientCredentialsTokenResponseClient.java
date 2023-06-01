@@ -129,4 +129,11 @@ public final class DefaultClientCredentialsTokenResponseClient
 		this.restOperations = restOperations;
 	}
 
+	public static OAuth2AccessTokenResponseClient.Builder<OAuth2ClientCredentialsGrantRequest> builder() {
+		DefaultClientCredentialsTokenResponseClient accessTokenResponseClient =
+				new DefaultClientCredentialsTokenResponseClient();
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
+				accessTokenResponseClient::setRequestEntityConverter, accessTokenResponseClient::setRestOperations);
+	}
+
 }

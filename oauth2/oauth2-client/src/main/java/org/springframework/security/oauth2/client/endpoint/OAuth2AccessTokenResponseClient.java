@@ -16,9 +16,12 @@
 
 package org.springframework.security.oauth2.client.endpoint;
 
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.RequestEntity;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
+import org.springframework.web.client.RestOperations;
 
 /**
  * A strategy for &quot;exchanging&quot; an authorization grant credential (e.g. an
@@ -54,5 +57,15 @@ public interface OAuth2AccessTokenResponseClient<T extends AbstractOAuth2Authori
 	 * exchange for the access token credential
 	 */
 	OAuth2AccessTokenResponse getTokenResponse(T authorizationGrantRequest);
+
+	interface Builder<T extends AbstractOAuth2AuthorizationGrantRequest> {
+
+		Builder<T> requestEntityConverter(Converter<T, RequestEntity<?>> requestEntityConverter);
+
+		Builder<T> restOperations(RestOperations restOperations);
+
+		OAuth2AccessTokenResponseClient<T> build();
+
+	}
 
 }

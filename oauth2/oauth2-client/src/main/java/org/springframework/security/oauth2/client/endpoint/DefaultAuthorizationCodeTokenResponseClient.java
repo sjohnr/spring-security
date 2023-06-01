@@ -132,4 +132,11 @@ public final class DefaultAuthorizationCodeTokenResponseClient
 		this.restOperations = restOperations;
 	}
 
+	public static OAuth2AccessTokenResponseClient.Builder<OAuth2AuthorizationCodeGrantRequest> builder() {
+		DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient =
+				new DefaultAuthorizationCodeTokenResponseClient();
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
+				accessTokenResponseClient::setRequestEntityConverter, accessTokenResponseClient::setRestOperations);
+	}
+
 }
