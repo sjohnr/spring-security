@@ -54,7 +54,7 @@ import org.springframework.web.client.RestTemplate;
  * (Client Credentials Grant)</a>
  */
 public final class DefaultClientCredentialsTokenResponseClient
-		implements OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> {
+		implements ConfigurableOAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> {
 
 	private static final String INVALID_TOKEN_RESPONSE_ERROR_CODE = "invalid_token_response";
 
@@ -130,10 +130,7 @@ public final class DefaultClientCredentialsTokenResponseClient
 	}
 
 	public static OAuth2AccessTokenResponseClient.Builder<OAuth2ClientCredentialsGrantRequest> builder() {
-		DefaultClientCredentialsTokenResponseClient accessTokenResponseClient =
-				new DefaultClientCredentialsTokenResponseClient();
-		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
-				accessTokenResponseClient::setRequestEntityConverter, accessTokenResponseClient::setRestOperations);
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(new DefaultClientCredentialsTokenResponseClient());
 	}
 
 }

@@ -52,7 +52,7 @@ import org.springframework.web.client.RestTemplate;
  * 4.1 Using Assertions as Authorization Grants</a>
  */
 public final class DefaultJwtBearerTokenResponseClient
-		implements OAuth2AccessTokenResponseClient<JwtBearerGrantRequest> {
+		implements ConfigurableOAuth2AccessTokenResponseClient<JwtBearerGrantRequest> {
 
 	private static final String INVALID_TOKEN_RESPONSE_ERROR_CODE = "invalid_token_response";
 
@@ -125,9 +125,7 @@ public final class DefaultJwtBearerTokenResponseClient
 	}
 
 	public static OAuth2AccessTokenResponseClient.Builder<JwtBearerGrantRequest> builder() {
-		DefaultJwtBearerTokenResponseClient accessTokenResponseClient = new DefaultJwtBearerTokenResponseClient();
-		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
-				accessTokenResponseClient::setRequestEntityConverter, accessTokenResponseClient::setRestOperations);
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(new DefaultJwtBearerTokenResponseClient());
 	}
 
 }

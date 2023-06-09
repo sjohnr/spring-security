@@ -51,7 +51,7 @@ import org.springframework.web.client.RestTemplate;
  * Refreshing an Access Token</a>
  */
 public final class DefaultRefreshTokenTokenResponseClient
-		implements OAuth2AccessTokenResponseClient<OAuth2RefreshTokenGrantRequest> {
+		implements ConfigurableOAuth2AccessTokenResponseClient<OAuth2RefreshTokenGrantRequest> {
 
 	private static final String INVALID_TOKEN_RESPONSE_ERROR_CODE = "invalid_token_response";
 
@@ -139,10 +139,7 @@ public final class DefaultRefreshTokenTokenResponseClient
 	}
 
 	public static OAuth2AccessTokenResponseClient.Builder<OAuth2RefreshTokenGrantRequest> builder() {
-		DefaultRefreshTokenTokenResponseClient accessTokenResponseClient =
-				new DefaultRefreshTokenTokenResponseClient();
-		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
-				accessTokenResponseClient::setRequestEntityConverter, accessTokenResponseClient::setRestOperations);
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(new DefaultRefreshTokenTokenResponseClient());
 	}
 
 }

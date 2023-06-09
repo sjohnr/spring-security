@@ -58,4 +58,9 @@ public class JwtBearerGrantRequestEntityConverter
 		return parameters;
 	}
 
+	public static OAuth2AuthorizationGrantRequestEntityConverterBuilder<JwtBearerGrantRequest> builder() {
+		return new DefaultOAuth2AuthorizationGrantRequestEntityConverterBuilder<>(
+				new JwtBearerGrantRequestEntityConverter());
+	}
+
 }

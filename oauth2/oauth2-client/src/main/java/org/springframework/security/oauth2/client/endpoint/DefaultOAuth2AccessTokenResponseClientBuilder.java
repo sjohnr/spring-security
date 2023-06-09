@@ -16,8 +16,6 @@
 
 package org.springframework.security.oauth2.client.endpoint;
 
-import java.util.function.Consumer;
-
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.client.RestOperations;
@@ -28,29 +26,21 @@ import org.springframework.web.client.RestOperations;
 final class DefaultOAuth2AccessTokenResponseClientBuilder<T extends AbstractOAuth2AuthorizationGrantRequest>
 		implements OAuth2AccessTokenResponseClient.Builder<T> {
 
-	private final OAuth2AccessTokenResponseClient<T> accessTokenResponseClient;
+	private final ConfigurableOAuth2AccessTokenResponseClient<T> accessTokenResponseClient;
 
-	private final Consumer<Converter<T, RequestEntity<?>>> requestEntityConverterSetter;
-
-	private final Consumer<RestOperations> restOperationsSetter;
-
-	DefaultOAuth2AccessTokenResponseClientBuilder(OAuth2AccessTokenResponseClient<T> accessTokenResponseClient,
-			Consumer<Converter<T, RequestEntity<?>>> requestEntityConverterSetter,
-			Consumer<RestOperations> restOperationsSetter) {
+	DefaultOAuth2AccessTokenResponseClientBuilder(ConfigurableOAuth2AccessTokenResponseClient<T> accessTokenResponseClient) {
 		this.accessTokenResponseClient = accessTokenResponseClient;
-		this.requestEntityConverterSetter = requestEntityConverterSetter;
-		this.restOperationsSetter = restOperationsSetter;
 	}
 
 	@Override
 	public OAuth2AccessTokenResponseClient.Builder<T> requestEntityConverter(Converter<T, RequestEntity<?>> requestEntityConverter) {
-		this.requestEntityConverterSetter.accept(requestEntityConverter);
+		this.accessTokenResponseClient.setRequestEntityConverter(requestEntityConverter);
 		return this;
 	}
 
 	@Override
 	public OAuth2AccessTokenResponseClient.Builder<T> restOperations(RestOperations restOperations) {
-		this.restOperationsSetter.accept(restOperations);
+		this.accessTokenResponseClient.setRestOperations(restOperations);
 		return this;
 	}
 

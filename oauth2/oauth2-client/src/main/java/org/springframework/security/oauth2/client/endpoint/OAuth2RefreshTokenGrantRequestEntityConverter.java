@@ -57,4 +57,9 @@ public class OAuth2RefreshTokenGrantRequestEntityConverter
 		return parameters;
 	}
 
+	public static OAuth2AuthorizationGrantRequestEntityConverterBuilder<OAuth2RefreshTokenGrantRequest> builder() {
+		return new DefaultOAuth2AuthorizationGrantRequestEntityConverterBuilder<>(
+				new OAuth2RefreshTokenGrantRequestEntityConverter());
+	}
+
 }

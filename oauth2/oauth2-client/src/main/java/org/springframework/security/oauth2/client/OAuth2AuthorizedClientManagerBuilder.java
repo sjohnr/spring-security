@@ -16,7 +16,9 @@
 
 package org.springframework.security.oauth2.client;
 
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.security.oauth2.client.endpoint.DefaultClientCredentialsTokenResponseClient;
@@ -45,6 +47,12 @@ public final class OAuth2AuthorizedClientManagerBuilder implements FactoryBean<O
 					.clientCredentials()
 					.password();
 	// @formatter:on
+
+	private Function<OAuth2AuthorizeRequest, Map<String, Object>> contextAttributesMapper;
+
+	private OAuth2AuthorizationSuccessHandler authorizationSuccessHandler;
+
+	private OAuth2AuthorizationFailureHandler authorizationFailureHandler;
 
 	private OAuth2AuthorizedClientManagerBuilder(ClientRegistrationRepository clientRegistrationRepository,
 			OAuth2AuthorizedClientRepository authorizedClientRepository) {
@@ -90,10 +98,34 @@ public final class OAuth2AuthorizedClientManagerBuilder implements FactoryBean<O
 		return this;
 	}
 
+	public OAuth2AuthorizedClientManagerBuilder contextAttributesMapper(Function<OAuth2AuthorizeRequest, Map<String, Object>> contextAttributesMapper) {
+		this.contextAttributesMapper = contextAttributesMapper;
+		return this;
+	}
+
+	public OAuth2AuthorizedClientManagerBuilder authorizationSuccessHandler(OAuth2AuthorizationSuccessHandler authorizationSuccessHandler) {
+		this.authorizationSuccessHandler = authorizationSuccessHandler;
+		return this;
+	}
+
+	public OAuth2AuthorizedClientManagerBuilder authorizationFailureHandler(OAuth2AuthorizationFailureHandler authorizationFailureHandler) {
+		this.authorizationFailureHandler = authorizationFailureHandler;
+		return this;
+	}
+
 	public DefaultOAuth2AuthorizedClientManager build() {
 		DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
 				this.clientRegistrationRepository, this.authorizedClientRepository);
 		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProviderBuilder.build());
+		if (this.contextAttributesMapper != null) {
+			authorizedClientManager.setContextAttributesMapper(this.contextAttributesMapper);
+		}
+		if (this.authorizationSuccessHandler != null) {
+			authorizedClientManager.setAuthorizationSuccessHandler(this.authorizationSuccessHandler);
+		}
+		if (this.authorizationFailureHandler != null) {
+			authorizedClientManager.setAuthorizationFailureHandler(this.authorizationFailureHandler);
+		}
 		return authorizedClientManager;
 	}
 

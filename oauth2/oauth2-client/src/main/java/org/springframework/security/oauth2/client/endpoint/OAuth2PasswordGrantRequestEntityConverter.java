@@ -58,4 +58,9 @@ public class OAuth2PasswordGrantRequestEntityConverter
 		return parameters;
 	}
 
+	public static OAuth2AuthorizationGrantRequestEntityConverterBuilder<OAuth2PasswordGrantRequest> builder() {
+		return new DefaultOAuth2AuthorizationGrantRequestEntityConverterBuilder<>(
+				new OAuth2PasswordGrantRequestEntityConverter());
+	}
+
 }

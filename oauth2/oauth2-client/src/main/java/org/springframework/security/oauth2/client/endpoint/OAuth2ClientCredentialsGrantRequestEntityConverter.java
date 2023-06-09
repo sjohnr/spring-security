@@ -57,4 +57,9 @@ public class OAuth2ClientCredentialsGrantRequestEntityConverter
 		return parameters;
 	}
 
+	public static OAuth2AuthorizationGrantRequestEntityConverterBuilder<OAuth2ClientCredentialsGrantRequest> builder() {
+		return new DefaultOAuth2AuthorizationGrantRequestEntityConverterBuilder<>(
+				new OAuth2ClientCredentialsGrantRequestEntityConverter());
+	}
+
 }

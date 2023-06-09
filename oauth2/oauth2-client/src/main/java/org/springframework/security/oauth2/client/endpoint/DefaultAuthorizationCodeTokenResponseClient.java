@@ -54,7 +54,7 @@ import org.springframework.web.client.RestTemplate;
  * (Authorization Code Grant)</a>
  */
 public final class DefaultAuthorizationCodeTokenResponseClient
-		implements OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
+		implements ConfigurableOAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
 
 	private static final String INVALID_TOKEN_RESPONSE_ERROR_CODE = "invalid_token_response";
 
@@ -133,10 +133,7 @@ public final class DefaultAuthorizationCodeTokenResponseClient
 	}
 
 	public static OAuth2AccessTokenResponseClient.Builder<OAuth2AuthorizationCodeGrantRequest> builder() {
-		DefaultAuthorizationCodeTokenResponseClient accessTokenResponseClient =
-				new DefaultAuthorizationCodeTokenResponseClient();
-		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
-				accessTokenResponseClient::setRequestEntityConverter, accessTokenResponseClient::setRestOperations);
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(new DefaultAuthorizationCodeTokenResponseClient());
 	}
 
 }

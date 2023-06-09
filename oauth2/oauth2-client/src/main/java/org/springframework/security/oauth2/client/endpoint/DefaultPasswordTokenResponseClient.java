@@ -59,7 +59,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @Deprecated
 public final class DefaultPasswordTokenResponseClient
-		implements OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> {
+		implements ConfigurableOAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> {
 
 	private static final String INVALID_TOKEN_RESPONSE_ERROR_CODE = "invalid_token_response";
 
@@ -134,10 +134,7 @@ public final class DefaultPasswordTokenResponseClient
 	}
 
 	public static OAuth2AccessTokenResponseClient.Builder<OAuth2PasswordGrantRequest> builder() {
-		DefaultPasswordTokenResponseClient accessTokenResponseClient = new DefaultPasswordTokenResponseClient();
-		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(accessTokenResponseClient,
-				accessTokenResponseClient::setRequestEntityConverter,
-				accessTokenResponseClient::setRestOperations);
+		return new DefaultOAuth2AccessTokenResponseClientBuilder<>(new DefaultPasswordTokenResponseClient());
 	}
 
 }
