@@ -28,6 +28,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultJwtBearerToken
 import org.springframework.security.oauth2.client.endpoint.DefaultRefreshTokenTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.JwtBearerGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationGrantRequestEntityConverterBuilder;
 import org.springframework.security.oauth2.client.endpoint.OAuth2RefreshTokenGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -195,12 +196,20 @@ public final class JwtBearerOAuth2AuthorizedClientProvider implements OAuth2Auth
 		private JwtBearerGrantBuilder() {
 		}
 
-		public JwtBearerGrantBuilder accessTokenResponseClient(OAuth2AccessTokenResponseClient<JwtBearerGrantRequest> accessTokenResponseClient) {
+		public JwtBearerGrantBuilder accessTokenResponseClient(
+				OAuth2AccessTokenResponseClient<JwtBearerGrantRequest> accessTokenResponseClient) {
 			this.accessTokenResponseClient = accessTokenResponseClient;
 			return this;
 		}
 
-		public JwtBearerGrantBuilder requestEntityConverter(Converter<JwtBearerGrantRequest, RequestEntity<?>> requestEntityConverter) {
+		public JwtBearerGrantBuilder accessTokenResponseClient(
+				OAuth2AccessTokenResponseClient.Builder<JwtBearerGrantRequest> builder) {
+			this.accessTokenResponseClient = builder.build();
+			return this;
+		}
+
+		public JwtBearerGrantBuilder requestEntityConverter(
+				Converter<JwtBearerGrantRequest, RequestEntity<?>> requestEntityConverter) {
 			this.requestEntityConverter = requestEntityConverter;
 			return this;
 		}
@@ -222,12 +231,10 @@ public final class JwtBearerOAuth2AuthorizedClientProvider implements OAuth2Auth
 
 		@Override
 		public OAuth2AuthorizedClientProvider build() {
-			JwtBearerOAuth2AuthorizedClientProvider authorizedClientProvider =
-					new JwtBearerOAuth2AuthorizedClientProvider();
-			if (this.accessTokenResponseClient == null && (this.requestEntityConverter != null
-					|| this.restOperations != null)) {
-				DefaultJwtBearerTokenResponseClient accessTokenResponseClient =
-						new DefaultJwtBearerTokenResponseClient();
+			JwtBearerOAuth2AuthorizedClientProvider authorizedClientProvider = new JwtBearerOAuth2AuthorizedClientProvider();
+			if (this.accessTokenResponseClient == null
+					&& (this.requestEntityConverter != null || this.restOperations != null)) {
+				DefaultJwtBearerTokenResponseClient accessTokenResponseClient = new DefaultJwtBearerTokenResponseClient();
 				if (this.requestEntityConverter != null) {
 					accessTokenResponseClient.setRequestEntityConverter(this.requestEntityConverter);
 				}

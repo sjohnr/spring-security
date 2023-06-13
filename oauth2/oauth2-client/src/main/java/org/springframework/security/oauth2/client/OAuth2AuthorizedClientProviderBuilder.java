@@ -77,6 +77,13 @@ public final class OAuth2AuthorizedClientProviderBuilder {
 		return OAuth2AuthorizedClientProviderBuilder.this;
 	}
 
+	public OAuth2AuthorizedClientProviderBuilder provider(OAuth2AuthorizedClientProviderBuilder.Builder builder) {
+		Assert.notNull(builder, "builder cannot be null");
+		OAuth2AuthorizedClientProvider provider = builder.build();
+		this.builders.computeIfAbsent(provider.getClass(), (k) -> () -> provider);
+		return OAuth2AuthorizedClientProviderBuilder.this;
+	}
+
 	/**
 	 * Configures support for the {@code authorization_code} grant.
 	 * @return the {@link OAuth2AuthorizedClientProviderBuilder}
@@ -214,6 +221,12 @@ public final class OAuth2AuthorizedClientProviderBuilder {
 			return this;
 		}
 
+		public PasswordGrantBuilder accessTokenResponseClient(
+				OAuth2AccessTokenResponseClient.Builder<OAuth2PasswordGrantRequest> builder) {
+			this.accessTokenResponseClient = builder.build();
+			return this;
+		}
+
 		/**
 		 * Sets the maximum acceptable clock skew, which is used when checking the access
 		 * token expiry. An access token is considered expired if
@@ -284,6 +297,12 @@ public final class OAuth2AuthorizedClientProviderBuilder {
 		public ClientCredentialsGrantBuilder accessTokenResponseClient(
 				OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> accessTokenResponseClient) {
 			this.accessTokenResponseClient = accessTokenResponseClient;
+			return this;
+		}
+
+		public ClientCredentialsGrantBuilder accessTokenResponseClient(
+				OAuth2AccessTokenResponseClient.Builder<OAuth2ClientCredentialsGrantRequest> builder) {
+			this.accessTokenResponseClient = builder.build();
 			return this;
 		}
 
@@ -376,6 +395,12 @@ public final class OAuth2AuthorizedClientProviderBuilder {
 		public RefreshTokenGrantBuilder accessTokenResponseClient(
 				OAuth2AccessTokenResponseClient<OAuth2RefreshTokenGrantRequest> accessTokenResponseClient) {
 			this.accessTokenResponseClient = accessTokenResponseClient;
+			return this;
+		}
+
+		public RefreshTokenGrantBuilder accessTokenResponseClient(
+				OAuth2AccessTokenResponseClient.Builder<OAuth2RefreshTokenGrantRequest> builder) {
+			this.accessTokenResponseClient = builder.build();
 			return this;
 		}
 

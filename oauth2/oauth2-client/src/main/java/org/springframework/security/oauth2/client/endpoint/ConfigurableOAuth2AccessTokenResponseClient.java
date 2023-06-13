@@ -32,8 +32,7 @@ import org.springframework.web.client.RestOperations;
 interface ConfigurableOAuth2AccessTokenResponseClient<T extends AbstractOAuth2AuthorizationGrantRequest>
 		extends OAuth2AccessTokenResponseClient<T> {
 
-	void setRequestEntityConverter(
-			Converter<T, RequestEntity<?>> requestEntityConverter);
+	void setRequestEntityConverter(Converter<T, RequestEntity<?>> requestEntityConverter);
 
 	void setRestOperations(RestOperations restOperations);
 

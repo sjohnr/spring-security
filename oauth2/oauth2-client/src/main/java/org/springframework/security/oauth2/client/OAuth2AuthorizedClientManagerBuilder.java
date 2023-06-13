@@ -60,13 +60,15 @@ public final class OAuth2AuthorizedClientManagerBuilder implements FactoryBean<O
 		this.authorizedClientRepository = authorizedClientRepository;
 	}
 
-	public OAuth2AuthorizedClientManagerBuilder providers(OAuth2AuthorizedClientProviderBuilder authorizedClientProviderBuilder) {
+	public OAuth2AuthorizedClientManagerBuilder providers(
+			OAuth2AuthorizedClientProviderBuilder authorizedClientProviderBuilder) {
 		Assert.notNull(authorizedClientProviderBuilder, "authorizedClientProviderBuilder cannot be null");
 		this.authorizedClientProviderBuilder = authorizedClientProviderBuilder;
 		return this;
 	}
 
-	public OAuth2AuthorizedClientManagerBuilder providers(Consumer<OAuth2AuthorizedClientProviderBuilder> builderConsumer) {
+	public OAuth2AuthorizedClientManagerBuilder providers(
+			Consumer<OAuth2AuthorizedClientProviderBuilder> builderConsumer) {
 		Assert.notNull(builderConsumer, "consumer cannot be null");
 		builderConsumer.accept(this.authorizedClientProviderBuilder);
 		return this;
@@ -78,37 +80,43 @@ public final class OAuth2AuthorizedClientManagerBuilder implements FactoryBean<O
 		return this;
 	}
 
+	public OAuth2AuthorizedClientManagerBuilder provider(OAuth2AuthorizedClientProviderBuilder.Builder builder) {
+		Assert.notNull(builder, "builder cannot be null");
+		this.authorizedClientProviderBuilder.provider(builder.build());
+		return this;
+	}
+
 	public OAuth2AuthorizedClientManagerBuilder restOperations(RestOperations restOperations) {
 		Assert.notNull(restOperations, "restOperations cannot be null");
 		// @formatter:off
 		this.authorizedClientProviderBuilder
 				.refreshToken((configurer) -> configurer.accessTokenResponseClient(
 						DefaultRefreshTokenTokenResponseClient.builder()
-								.restOperations(restOperations)
-								.build()))
+								.restOperations(restOperations)))
 				.clientCredentials((configurer) -> configurer.accessTokenResponseClient(
 						DefaultClientCredentialsTokenResponseClient.builder()
-								.restOperations(restOperations)
-								.build()))
+								.restOperations(restOperations)))
 				.password((configurer) -> configurer.accessTokenResponseClient(
 						DefaultPasswordTokenResponseClient.builder()
-								.restOperations(restOperations)
-								.build()));
+								.restOperations(restOperations)));
 		// @formatter:on
 		return this;
 	}
 
-	public OAuth2AuthorizedClientManagerBuilder contextAttributesMapper(Function<OAuth2AuthorizeRequest, Map<String, Object>> contextAttributesMapper) {
+	public OAuth2AuthorizedClientManagerBuilder contextAttributesMapper(
+			Function<OAuth2AuthorizeRequest, Map<String, Object>> contextAttributesMapper) {
 		this.contextAttributesMapper = contextAttributesMapper;
 		return this;
 	}
 
-	public OAuth2AuthorizedClientManagerBuilder authorizationSuccessHandler(OAuth2AuthorizationSuccessHandler authorizationSuccessHandler) {
+	public OAuth2AuthorizedClientManagerBuilder authorizationSuccessHandler(
+			OAuth2AuthorizationSuccessHandler authorizationSuccessHandler) {
 		this.authorizationSuccessHandler = authorizationSuccessHandler;
 		return this;
 	}
 
-	public OAuth2AuthorizedClientManagerBuilder authorizationFailureHandler(OAuth2AuthorizationFailureHandler authorizationFailureHandler) {
+	public OAuth2AuthorizedClientManagerBuilder authorizationFailureHandler(
+			OAuth2AuthorizationFailureHandler authorizationFailureHandler) {
 		this.authorizationFailureHandler = authorizationFailureHandler;
 		return this;
 	}

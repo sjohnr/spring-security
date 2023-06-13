@@ -28,13 +28,22 @@ final class DefaultOAuth2AccessTokenResponseClientBuilder<T extends AbstractOAut
 
 	private final ConfigurableOAuth2AccessTokenResponseClient<T> accessTokenResponseClient;
 
-	DefaultOAuth2AccessTokenResponseClientBuilder(ConfigurableOAuth2AccessTokenResponseClient<T> accessTokenResponseClient) {
+	DefaultOAuth2AccessTokenResponseClientBuilder(
+			ConfigurableOAuth2AccessTokenResponseClient<T> accessTokenResponseClient) {
 		this.accessTokenResponseClient = accessTokenResponseClient;
 	}
 
 	@Override
-	public OAuth2AccessTokenResponseClient.Builder<T> requestEntityConverter(Converter<T, RequestEntity<?>> requestEntityConverter) {
+	public OAuth2AccessTokenResponseClient.Builder<T> requestEntityConverter(
+			Converter<T, RequestEntity<?>> requestEntityConverter) {
 		this.accessTokenResponseClient.setRequestEntityConverter(requestEntityConverter);
+		return this;
+	}
+
+	@Override
+	public OAuth2AccessTokenResponseClient.Builder<T> requestEntityConverter(
+			OAuth2AuthorizationGrantRequestEntityConverterBuilder<T> builder) {
+		this.accessTokenResponseClient.setRequestEntityConverter(builder.build());
 		return this;
 	}
 
@@ -48,4 +57,5 @@ final class DefaultOAuth2AccessTokenResponseClientBuilder<T extends AbstractOAut
 	public OAuth2AccessTokenResponseClient<T> build() {
 		return this.accessTokenResponseClient;
 	}
+
 }

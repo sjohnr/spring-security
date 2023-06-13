@@ -62,6 +62,8 @@ public interface OAuth2AccessTokenResponseClient<T extends AbstractOAuth2Authori
 
 		Builder<T> requestEntityConverter(Converter<T, RequestEntity<?>> requestEntityConverter);
 
+		Builder<T> requestEntityConverter(OAuth2AuthorizationGrantRequestEntityConverterBuilder<T> builder);
+
 		Builder<T> restOperations(RestOperations restOperations);
 
 		OAuth2AccessTokenResponseClient<T> build();
