@@ -311,7 +311,7 @@ public class OidcUserService implements OAuth2UserService<OidcUserRequest, OidcU
 	 * {@link OidcUserRequest} and {@link OidcUserInfo}
 	 * @since 6.3
 	 */
-	public void setOidcUserMapper(BiFunction<OidcUserRequest, OidcUserInfo, OidcUser> oidcUserMapper) {
+	public final void setOidcUserMapper(BiFunction<OidcUserRequest, OidcUserInfo, OidcUser> oidcUserMapper) {
 		Assert.notNull(oidcUserMapper, "oidcUserMapper cannot be null");
 		this.oidcUserMapper = oidcUserMapper;
 	}
