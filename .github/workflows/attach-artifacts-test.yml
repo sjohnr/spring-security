@@ -17,8 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: spring-io/spring-gradle-build-action@v2
       - run: ./gradlew publishMavenJavaPublicationToLocalRepository
-      - run: pushd build && zip -r artifacts publications && popd
+      - run: pushd build && zip -r maven-repo publications && popd
       - uses: actions/upload-artifact@v4
         with:
-          name: Artifacts
-          path: build/artifacts.zip
+          name: maven-repo
+          path: build/maven-repo.zip
