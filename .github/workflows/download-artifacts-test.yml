@@ -1,0 +1,30 @@
+name: Attach Artifacts Test
+
+on:
+  push:
+    branches:
+      - download-artifacts-test
+  workflow_dispatch:
+
+jobs:
+  download-artifacts:
+    name: Download Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - id: get-workflow-run-id
+        uses: sjohnr/spring-security-release-tools/.github/actions/get-workflow-run-id@download-artifacts
+        with:
+          repository: sjohnr/spring-security
+          workflow-id: attach-artifacts-test.yml
+      - uses: actions/download-artifact@v4
+        with:
+          name: maven-repo
+          path: build
+          repository: sjohnr/spring-security
+          run-id: ${{ steps.get-workflow-run-id.outputs.run-id }}
+      - run: |
+          pushd build
+          ls -l
+          unzip maven-repo.zip
+          ls -l
+          popd
