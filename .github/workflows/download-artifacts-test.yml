@@ -21,7 +21,7 @@ jobs:
 #          name: maven-repo
 #          path: build
           repository: sjohnr/spring-security
-          run-id: ${{ steps.get-workflow-run-id.outputs.run-id }}
+          run-id: '${{ steps.get-workflow-run-id.outputs.run-id }}'
       - run: |
           pushd build
           ls -l
