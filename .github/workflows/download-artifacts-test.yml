@@ -19,7 +19,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
 #          name: maven-repo
-          path: build
+#          path: build
           repository: sjohnr/spring-security
           run-id: ${{ steps.get-workflow-run-id.outputs.run-id }}
       - run: |
