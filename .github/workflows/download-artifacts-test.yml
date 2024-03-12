@@ -6,6 +6,9 @@ on:
       - download-artifacts-test
   workflow_dispatch:
 
+permissions:
+  actions: read
+
 jobs:
   download-artifacts:
     name: Download Artifacts
@@ -18,10 +21,11 @@ jobs:
           workflow-id: attach-artifacts-test.yml
       - uses: actions/download-artifact@v4
         with:
-#          name: maven-repo
-#          path: build
+          name: maven-repo
+          path: build
           repository: sjohnr/spring-security
-          run-id: '${{ steps.get-workflow-run-id.outputs.run-id }}'
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.get-workflow-run-id.outputs.run-id }}
       - run: |
           pushd build
           ls -l
