@@ -22,3 +22,4 @@ jobs:
         with:
           name: maven-repo
           path: build/maven-repo.zip
+          retention-days: 7

@@ -1,4 +1,4 @@
-name: Attach Artifacts Test
+name: Download Artifacts Test
 
 on:
   push:
