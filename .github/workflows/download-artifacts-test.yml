@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: get-workflow-run-id
-        uses: sjohnr/spring-security-release-tools/.github/actions/get-workflow-run-id@download-artifacts
+        uses: spring-io/spring-security-release-tools/.github/actions/get-workflow-run-id@v1
         with:
           repository: sjohnr/spring-security
           workflow-id: attach-artifacts-test.yml
