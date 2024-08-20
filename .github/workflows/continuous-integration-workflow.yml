@@ -247,7 +247,7 @@ jobs:
   send-notification:
     name: Send Notification
     needs: [ perform_release, perform_post_release ]
-    if: ${{ failure() || cancelled() }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Send Notification

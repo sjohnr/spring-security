@@ -45,7 +45,7 @@ jobs:
   send-notification:
     name: Send Notification
     needs: [ build, generate-docs ]
-    if: ${{ failure() && github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'spring-projects/spring-security' }}
+    if: ${{ always() && github.event.pull_request.user.login == 'sjohnr' && github.repository == 'sjohnr/spring-security' }}
     runs-on: ubuntu-latest
     steps:
       - name: Send Notification
