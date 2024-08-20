@@ -6,6 +6,8 @@ javaPlatform {
 	allowDependencies()
 }
 
+// update dependencies test
+
 dependencies {
 	if (project.hasProperty("isOverrideVersionCatalog")) {
 		def springFrameworkVersion = project.property("springFrameworkVersion")
