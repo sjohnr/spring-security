@@ -1,9 +1,12 @@
 name: Release Scheduler
+
 on:
   schedule:
   - cron: '15 15 * * MON' # Every Monday at 3:15pm UTC
   workflow_dispatch:
+
 permissions: read-all
+
 jobs:
   dispatch_scheduled_releases:
     name: Dispatch scheduled releases

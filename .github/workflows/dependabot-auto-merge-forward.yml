@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   get-supported-branches:
-    uses: spring-io/spring-security-release-tools/.github/workflows/retrieve-spring-supported-versions.yml@actions-v1
+    uses: spring-io/spring-security-release-tools/.github/workflows/retrieve-spring-supported-versions.yml@v1
     with:
       project: spring-security
       type: oss
@@ -36,7 +36,7 @@ jobs:
           git config user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Run Auto Merge Forward
         id: run-auto-merge-forward
-        uses: spring-io/spring-security-release-tools/.github/actions/auto-merge-forward@actions-v1
+        uses: spring-io/spring-security-release-tools/.github/actions/auto-merge-forward@v1
         with:
           branches: 5.8.x,${{ needs.get-supported-branches.outputs.supported_versions }},main
           from-author: dependabot[bot]
