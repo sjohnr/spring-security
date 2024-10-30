@@ -88,7 +88,7 @@ jobs:
       should-deploy-artifacts: ${{ needs.build.outputs.should-deploy-artifacts }}
     secrets: inherit
   deploy-docs:
-    name: Deploy Docs
+    name: Deploy Javadoc
     needs: [ build, test, check-samples, check-tangles ]
     uses: spring-io/spring-security-release-tools/.github/workflows/deploy-docs.yml@v1
     with:
@@ -101,9 +101,17 @@ jobs:
     with:
       should-deploy-schema: ${{ needs.build.outputs.should-deploy-artifacts }}
     secrets: inherit
+  dispatch-deploy-docs:
+    name: Dispatch Deploy Docs
+    needs: [ build, test, check-samples, check-tangles ]
+    uses: spring-io/spring-security-release-tools/.github/workflows/dispatch-deploy-docs.yml@v1
+    with:
+      should-deploy-docs: ${{ needs.build.outputs.should-deploy-artifacts }}
+      build-type: partial
+    secrets: inherit
   perform-release:
     name: Perform Release
-    needs: [ deploy-artifacts, deploy-docs, deploy-schema ]
+    needs: [ deploy-artifacts, deploy-docs, deploy-schema, dispatch-deploy-docs ]
     uses: spring-io/spring-security-release-tools/.github/workflows/perform-release.yml@v1
     with:
       should-perform-release: ${{ needs.deploy-artifacts.outputs.artifacts-deployed }}
