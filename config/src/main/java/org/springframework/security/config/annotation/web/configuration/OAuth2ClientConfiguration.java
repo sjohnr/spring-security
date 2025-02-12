@@ -23,20 +23,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.context.annotation.AnnotationBeanNameGenerator;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Fallback;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.ResolvableType;
@@ -105,48 +98,41 @@ final class OAuth2ClientConfiguration {
 	 * @since 6.2.0
 	 */
 	@Configuration(proxyBeanMethods = false)
-	static class OAuth2AuthorizedClientManagerConfiguration {
+	static class OAuth2AuthorizedClientManagerConfiguration extends OAuth2AuthorizedClientManagerRegistrar {
 
-		@Bean(name = OAuth2AuthorizedClientManagerRegistrar.BEAN_NAME)
-		OAuth2AuthorizedClientManagerRegistrar authorizedClientManagerRegistrar() {
-			return new OAuth2AuthorizedClientManagerRegistrar();
+		@Fallback
+		@Bean(name = "defaultAuthorizedClientManager")
+		OAuth2AuthorizedClientManager defaultAuthorizedClientManager() {
+			return this.getAuthorizedClientManager();
 		}
 
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	static class OAuth2ClientWebMvcSecurityConfiguration implements WebMvcConfigurer {
+	static class OAuth2ClientWebMvcSecurityConfiguration extends OAuth2AuthorizedClientManagerRegistrar implements WebMvcConfigurer {
 
 		private final OAuth2AuthorizedClientManager authorizedClientManager;
 
 		private final ObjectProvider<SecurityContextHolderStrategy> securityContextHolderStrategy;
 
-		private final OAuth2AuthorizedClientManagerRegistrar authorizedClientManagerRegistrar;
-
 		OAuth2ClientWebMvcSecurityConfiguration(ObjectProvider<OAuth2AuthorizedClientManager> authorizedClientManager,
-				ObjectProvider<SecurityContextHolderStrategy> securityContextHolderStrategy,
-				OAuth2AuthorizedClientManagerRegistrar authorizedClientManagerRegistrar) {
+				ObjectProvider<SecurityContextHolderStrategy> securityContextHolderStrategy) {
 			this.authorizedClientManager = authorizedClientManager.getIfUnique();
 			this.securityContextHolderStrategy = securityContextHolderStrategy;
-			this.authorizedClientManagerRegistrar = authorizedClientManagerRegistrar;
 		}
 
 		@Override
 		public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-			OAuth2AuthorizedClientManager authorizedClientManager = getAuthorizedClientManager();
+			OAuth2AuthorizedClientManager authorizedClientManager = this.authorizedClientManager;
+			if (authorizedClientManager == null) {
+				authorizedClientManager = this.getAuthorizedClientManagerIfAvailable();
+			}
 			if (authorizedClientManager != null) {
 				OAuth2AuthorizedClientArgumentResolver resolver = new OAuth2AuthorizedClientArgumentResolver(
 						authorizedClientManager);
 				this.securityContextHolderStrategy.ifAvailable(resolver::setSecurityContextHolderStrategy);
 				argumentResolvers.add(resolver);
 			}
-		}
-
-		private OAuth2AuthorizedClientManager getAuthorizedClientManager() {
-			if (this.authorizedClientManager != null) {
-				return this.authorizedClientManager;
-			}
-			return this.authorizedClientManagerRegistrar.getAuthorizedClientManagerIfAvailable();
 		}
 
 	}
@@ -159,12 +145,7 @@ final class OAuth2ClientConfiguration {
 	 * @author Steve Riesenberg
 	 * @since 6.2.0
 	 */
-	static final class OAuth2AuthorizedClientManagerRegistrar
-			implements BeanDefinitionRegistryPostProcessor, BeanFactoryAware {
-
-		static final String BEAN_NAME = "authorizedClientManagerRegistrar";
-
-		static final String FACTORY_METHOD_NAME = "getAuthorizedClientManager";
+	static class OAuth2AuthorizedClientManagerRegistrar implements ApplicationContextAware {
 
 		// @formatter:off
 		private static final Set<Class<?>> KNOWN_AUTHORIZED_CLIENT_PROVIDERS = Set.of(
@@ -177,34 +158,11 @@ final class OAuth2ClientConfiguration {
 		);
 		// @formatter:on
 
-		private final AnnotationBeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
-
-		private ListableBeanFactory beanFactory;
+		private ApplicationContext applicationContext;
 
 		@Override
-		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-			if (getBeanNamesForType(OAuth2AuthorizedClientManager.class).length != 0
-					|| getBeanNamesForType(ClientRegistrationRepository.class).length != 1
-					|| getBeanNamesForType(OAuth2AuthorizedClientRepository.class).length != 1) {
-				return;
-			}
-
-			BeanDefinition beanDefinition = BeanDefinitionBuilder
-				.rootBeanDefinition(OAuth2AuthorizedClientManager.class)
-				.setFactoryMethodOnBean(FACTORY_METHOD_NAME, BEAN_NAME)
-				.getBeanDefinition();
-
-			registry.registerBeanDefinition(this.beanNameGenerator.generateBeanName(beanDefinition, registry),
-					beanDefinition);
-		}
-
-		@Override
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		}
-
-		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.beanFactory = (ListableBeanFactory) beanFactory;
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+			this.applicationContext = applicationContext;
 		}
 
 		OAuth2AuthorizedClientManager getAuthorizedClientManagerIfAvailable() {
@@ -216,14 +174,13 @@ final class OAuth2ClientConfiguration {
 		}
 
 		OAuth2AuthorizedClientManager getAuthorizedClientManager() {
-			ClientRegistrationRepository clientRegistrationRepository = BeanFactoryUtils
-				.beanOfTypeIncludingAncestors(this.beanFactory, ClientRegistrationRepository.class, true, true);
+			ClientRegistrationRepository clientRegistrationRepository =
+				this.applicationContext.getBean(ClientRegistrationRepository.class);
+			OAuth2AuthorizedClientRepository authorizedClientRepository =
+				this.applicationContext.getBean(OAuth2AuthorizedClientRepository.class);
 
-			OAuth2AuthorizedClientRepository authorizedClientRepository = BeanFactoryUtils
-				.beanOfTypeIncludingAncestors(this.beanFactory, OAuth2AuthorizedClientRepository.class, true, true);
-
-			Collection<OAuth2AuthorizedClientProvider> authorizedClientProviderBeans = BeanFactoryUtils
-				.beansOfTypeIncludingAncestors(this.beanFactory, OAuth2AuthorizedClientProvider.class, true, true)
+			Collection<OAuth2AuthorizedClientProvider> authorizedClientProviderBeans = this.applicationContext
+				.getBeansOfType(OAuth2AuthorizedClientProvider.class)
 				.values();
 
 			OAuth2AuthorizedClientProvider authorizedClientProvider;
@@ -415,11 +372,11 @@ final class OAuth2ClientConfiguration {
 		}
 
 		private <T> String[] getBeanNamesForType(Class<T> beanClass) {
-			return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, beanClass, true, true);
+			return this.applicationContext.getBeanNamesForType(beanClass);
 		}
 
 		private <T> T getBeanOfType(ResolvableType resolvableType) {
-			ObjectProvider<T> objectProvider = this.beanFactory.getBeanProvider(resolvableType, true);
+			ObjectProvider<T> objectProvider = this.applicationContext.getBeanProvider(resolvableType, true);
 			return objectProvider.getIfAvailable();
 		}
 
