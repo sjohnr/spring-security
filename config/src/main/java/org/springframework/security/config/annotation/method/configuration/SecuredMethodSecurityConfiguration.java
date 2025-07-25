@@ -16,11 +16,14 @@
 
 package org.springframework.security.config.annotation.method.configuration;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.beans.factory.ObjectProvider;
@@ -36,9 +39,12 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authorization.AuthoritiesAuthorizationManager;
 import org.springframework.security.authorization.AuthorizationEventPublisher;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationManagerFactory;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor;
 import org.springframework.security.authorization.method.SecuredAuthorizationManager;
 import org.springframework.security.config.ObjectPostProcessor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 
 /**
@@ -99,6 +105,40 @@ final class SecuredMethodSecurityConfiguration implements ImportAware, AopInfras
 	@Autowired(required = false)
 	void setEventPublisher(AuthorizationEventPublisher eventPublisher) {
 		this.methodInterceptor.setAuthorizationEventPublisher(eventPublisher);
+	}
+
+	@Autowired(required = false)
+	void setAuthorizationManagerFactory(AuthorizationManagerFactory<Collection<String>> authorizationManagerFactory) {
+		this.authorizationManager.setAuthoritiesAuthorizationManager(
+				new DelegatingAuthoritiesAuthorizationManager(authorizationManagerFactory));
+	}
+
+	private static final class DelegatingAuthoritiesAuthorizationManager
+			implements AuthorizationManager<Collection<String>> {
+
+		private static final String[] STRING_ARRAY = new String[0];
+
+		private final AuthorizationManagerFactory<Collection<String>> authorizationManagerFactory;
+
+		private final Map<Collection<String>, AuthorizationManager<Collection<String>>> cachedAuthorizationManagers = new ConcurrentHashMap<>();
+
+		private DelegatingAuthoritiesAuthorizationManager(
+				AuthorizationManagerFactory<Collection<String>> authorizationManagerFactory) {
+			this.authorizationManagerFactory = authorizationManagerFactory;
+		}
+
+		@Override
+		public @Nullable AuthorizationResult authorize(Supplier<Authentication> authentication,
+				Collection<String> authorities) {
+			AuthorizationManager<Collection<String>> delegate = getAuthorizationManager(authorities);
+			return delegate.authorize(authentication, authorities);
+		}
+
+		private AuthorizationManager<Collection<String>> getAuthorizationManager(Collection<String> authorities) {
+			return this.cachedAuthorizationManagers.computeIfAbsent(authorities,
+					(k) -> this.authorizationManagerFactory.hasAnyAuthority(authorities.toArray(STRING_ARRAY)));
+		}
+
 	}
 
 }
